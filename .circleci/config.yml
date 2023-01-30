@@ -106,6 +106,13 @@ jobs:
       # Docker image here
     steps:
       - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: scan frontend
+          command: |
+            cd frontend
+            npm audit --audit-level=critical
       # Checkout code from git
       # Restore from cache
       # Your job code here
@@ -116,6 +123,13 @@ jobs:
       # Docker image here
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: scan backend
+          command: |
+            cd backend
+            npm audit --audit-level=critical
       # Checkout code from git
       # Restore from cache
       # Your job code here
