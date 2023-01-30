@@ -112,6 +112,7 @@ jobs:
           name: scan frontend
           command: |
             cd frontend
+            npm i --package-lock-only
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
       # Checkout code from git
@@ -130,6 +131,7 @@ jobs:
           name: scan backend
           command: |
             cd backend
+            npm i --package-lock-only
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
       # Checkout code from git
