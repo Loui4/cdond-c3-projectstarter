@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  slack: circleci/slack@4.12.1
 
 commands:
   destroy-environment:
@@ -43,6 +45,7 @@ jobs:
       - run:
           name: Build front-end
           command: |
+            exit 1
             cd frontend
             npm install
             npm run build
@@ -60,6 +63,7 @@ jobs:
       - run:
           name: Back-end build
           command: |
+            exit 1
             cd backend
             npm install
             npm run build
@@ -117,6 +121,7 @@ jobs:
       # Checkout code from git
       # Restore from cache
       # Your job code here
+      # xoxb-4414289592150-4728597724067-LoFY0ONBdOehN0ACxttrqUWg
 
   scan-backend:
     docker:
