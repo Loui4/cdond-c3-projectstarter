@@ -156,7 +156,6 @@ jobs:
       - run:
           name: install tar && gzip
           command: |
-            yum makecache --refresh
             yum -y install gzip.x86_64
             yum -y install tar.x86_64
 
