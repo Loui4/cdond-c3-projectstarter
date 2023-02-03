@@ -154,11 +154,11 @@ jobs:
       # Checkout code from git
       - checkout
       - run:
-          name: install gzip
+          name: install tar && gzip
           command: |
-            sudo apt-get update
-            sudo apt-get -y install gzip
-            sudo apt-get -y install tar
+            apt-get update
+            apt-get -y install gzip
+            apt-get -y install tar
 
       - run:
           name: Ensure back-end infrastructure exists
