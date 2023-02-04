@@ -328,8 +328,8 @@ jobs:
 
   smoke-test:
     docker:
-      - image: circleci/node:13.8.0
-      # Lightweight Docker image
+      - image: python:3.7-alpine3.11
+        # Lightweight Docker image
     steps:
       # Checkout code from git
       # - run:
@@ -347,13 +347,14 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            echo $API_URL
+
+            echo "$API_URL"
 
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                exit 0
+                return 0
             else
-                exit 1
+                return 1
             fi
       - run:
           name: Frontend smoke test.
