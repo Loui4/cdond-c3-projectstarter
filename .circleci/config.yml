@@ -256,16 +256,14 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: amazon/aws-cli
-      # Docker image here that supports AWS CLI
+      - image: doctrine/nodejs-aws-cli
+        # Docker image here that supports AWS CLI
     steps:
       - checkout
       # Checkout code from git
       - run:
           name: Install dependencies
           command: |
-            curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
-            yum -y install nodejs
             yum -y install tar gzip
       - run:
           name: Get backend url
