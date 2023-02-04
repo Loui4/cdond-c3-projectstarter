@@ -241,6 +241,7 @@ jobs:
           name: Run migrations
           command: |
             cd backend
+            cat package.json
             npm install
             npm run migrations > migrations_dump.txt
 
@@ -373,8 +374,8 @@ workflows:
         # filters:
         #   branches:
         #     only: [test-feature-branch]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
       - deploy-frontend:
