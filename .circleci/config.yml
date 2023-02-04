@@ -250,7 +250,7 @@ jobs:
           command: |
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
-                curl  --insecure https://kvdb.io/7nfZqKsdpfHEuEhQ4Eyvc7/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+                curl --insecure https://kvdb.io/7nfZqKsdpfHEuEhQ4Eyvc7/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       # Here's where you will add some code to rollback on failure
 
@@ -259,39 +259,75 @@ jobs:
       - image: circleci/node:13.8.0
       # Docker image here that supports AWS CLI
     steps:
+      - checkout
       # Checkout code from git
       - run:
-          name: Install dependencies
+          name: Install aws cli
           command: |
-            # your code here
+            apt-get update 
+            apt-get install -y less curl unzip
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - run:
           name: Get backend url
           command: |
-            # your code here
+            export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name, Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text)
+
             export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
       - run:
           name: Deploy frontend objects
           command: |
-            # your code here
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       # Here's where you will add some code to rollback on failure
 
   deploy-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: python:3.7-alpine3.11
       # Docker image here that supports Ansible
     steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "65:f2:3c:63:40:02:56:c3:c6:51:93:14:58:bc:85:1f"
       # Checkout code from git
       # Add ssh keys with fingerprint
       # attach workspace
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
             # your code here
+            apk add --update ansible curl rsync openssh nodejs npm
+            pip install awscli
+            aws --version
+            ansible --version
+
+            # your code here
       - run:
           name: Deploy backend
           command: |
-            # your code here
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            mkdir .circleci/ansible/roles/deploy/files
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure
 
   smoke-test:
@@ -369,11 +405,11 @@ workflows:
       #     requires: [build-backend]
       # - scan-frontend:
       #     requires: [build-frontend]
-      - deploy-infrastructure
-        # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-        # filters:
-        #   branches:
-        #     only: [test-feature-branch]
+      # - deploy-infrastructure
+      # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      # filters:
+      #   branches:
+      #     only: [test-feature-branch]
       # - configure-infrastructure:
       #     requires: [deploy-infrastructure]
       - run-migrations
