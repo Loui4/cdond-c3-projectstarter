@@ -195,22 +195,38 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: circleci/node:13.8.0
+      - image: ubuntu:23.04
       # Docker image here that supports Ansible
     steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "65:f2:3c:63:40:02:56:c3:c6:51:93:14:58:bc:85:1f"
+      - attach_workspace:
+          at: ~/
       # Checkout code from git
       # Add ssh keys with fingerprint
       # attach workspace
       - run:
           name: Install dependencies
           command: |
-            # Your code here
-            exit 1
+            apt update --yes
+            apt install software-properties-common --yes
+            add-apt-repository --yes --update ppa:ansible/ansible
+            export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
+            truncate -s0 /tmp/preseed.cfg; \
+            echo "tzdata tzdata/Areas select Europe" >> /tmp/preseed.cfg; \
+            echo "tzdata tzdata/Zones/Europe select Berlin" >> /tmp/preseed.cfg; \
+            debconf-set-selections /tmp/preseed.cfg && \
+            rm -f /etc/timezone /etc/localtime && \
+            apt-get update && \
+            apt-get install -y tzdata
+            apt install ansible --yes
       - run:
           name: Configure server
           command: |
-            # Your code here
-            exit 1
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
       # Here's where you will add some code to rollback on failure
 
   run-migrations:
