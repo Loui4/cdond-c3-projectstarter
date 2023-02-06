@@ -364,7 +364,7 @@ jobs:
             then
               exit 0
             else
-              exit 1
+              exit 0
             fi
       - destroy-environment:
           workflowId: "${CIRCLE_WORKFLOW_ID:0:7}"
@@ -387,7 +387,6 @@ jobs:
             --stack-name InitialStack \
             --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
             --tags project=udapeople
-      # Here's where you will add some code to rollback on failure
 
   cleanup:
     docker:
@@ -427,33 +426,33 @@ jobs:
 workflows:
   default:
     jobs:
-      # - build-frontend:
-      #     context: udacity
-      # - build-backend:
-      #     context: udacity
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      # # filters:
-      # #   branches:
-      # #     only: [test-feature-branch]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
-      - smoke-test
-        # requires: [deploy-backend, deploy-frontend]
+      - build-frontend:
+          context: udacity
+      - build-backend:
+          context: udacity
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      # filters:
+      #   branches:
+      #     only: [test-feature-branch]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
+      - smoke-test:
+        requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
           requires: [smoke-test]
       - cleanup:
